@@ -136,11 +136,11 @@ module Gollum
     # that if you specify try_on_disk=true, you may or may not get a file
     # for which on_disk? is actually true.
     def find(name, version, try_on_disk=false)
-      checked = name.downcase
+      checked = name.force_encoding('utf-8').downcase
       map     = @wiki.tree_map_for(version)
       commit  = version.is_a?(Grit::Commit) ? version : @wiki.commit_for(version)
 
-      if entry = map.detect { |entry| entry.path.downcase == checked }
+      if entry = map.detect { |entry| entry.path.force_encoding('utf-8').downcase == checked }
         @path    = name
         @version = commit
 

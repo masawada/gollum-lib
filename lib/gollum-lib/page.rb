@@ -341,7 +341,7 @@ module Gollum
     # Returns the String canonical name.
     def self.cname(name, char_white_sub = '-', char_other_sub = '-')
       name.respond_to?(:gsub) ?
-        name.gsub(%r{\s},char_white_sub).gsub(%r{[<>+]}, char_other_sub) :
+        name.force_encoding('utf-8').gsub(%r{\s}u,char_white_sub).gsub(%r{[<>+]}u, char_other_sub) :
         ''
     end
 
