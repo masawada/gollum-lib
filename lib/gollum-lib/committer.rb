@@ -90,27 +90,27 @@ module Gollum
       dir.gsub!(' ', '-')
       name.gsub!(' ', '-')
 
-      path = @wiki.page_file_name(name, format)
+      path = @wiki.page_file_name(name, format).force_encoding('utf-8')
 
       dir = '/' if dir.strip.empty?
 
       fullpath = ::File.join(*[@wiki.page_file_dir, dir, path].compact)
-      fullpath = fullpath[1..-1] if fullpath =~ /^\//
+      fullpath = fullpath[1..-1] if fullpath =~ /^\//u
 
       if index.current_tree && tree = index.current_tree / (@wiki.page_file_dir || '/')
         tree = tree / dir unless tree.nil?
       end
 
       if tree
-        downpath = path.downcase.sub(/\.\w+$/, '')
+        downpath = path.downcase.sub(/\.\w+$/u, '')
 
         tree.blobs.each do |blob|
           next if page_path_scheduled_for_deletion?(index.tree, fullpath)
 
-          existing_file = blob.name.downcase.sub(/\.\w+$/, '')
-          existing_file_ext = ::File.extname(blob.name).sub(/^\./, '')
+          existing_file = blob.name.downcase.sub(/\.\w+$/u, '')
+          existing_file_ext = ::File.extname(blob.name).sub(/^\./u, '')
 
-          new_file_ext = ::File.extname(path).sub(/^\./, '')
+          new_file_ext = ::File.extname(path).sub(/^\./u, '')
 
           if downpath == existing_file && !(allow_same_ext && new_file_ext == existing_file_ext)
             raise DuplicatePageError.new(dir, blob.name, path)
@@ -118,7 +118,7 @@ module Gollum
         end
       end
 
-      fullpath = fullpath.force_encoding('ascii-8bit') if fullpath.respond_to?(:force_encoding)
+      fullpath = fullpath.force_encoding('utf-8') if fullpath.respond_to?(:force_encoding)
 
       begin
         data = @wiki.normalize(data)
@@ -151,7 +151,7 @@ module Gollum
             ::File.join(dir, @wiki.page_file_name(name, format))
           end
 
-        path = path.force_encoding('ascii-8bit') if path.respond_to?(:force_encoding)
+        path = path.force_encoding('utf-8') if path.respond_to?(:force_encoding)
 
         Dir.chdir(::File.join(@wiki.repo.path, '..')) do
           if file_path_scheduled_for_deletion?(index.tree, path)
@@ -236,7 +236,7 @@ module Gollum
 
     # Proxies methods t
     def method_missing(name, *args)
-      args.map! { |item| item.respond_to?(:force_encoding) ? item.force_encoding('ascii-8bit') : item }
+      args.map! { |item| item.respond_to?(:force_encoding) ? item.force_encoding('utf-8') : item }
       index.send(name, *args)
     end
   end

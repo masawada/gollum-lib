@@ -356,7 +356,7 @@ module Gollum
       # File.split gives us relative paths with ".", commiter.add_to_index doesn't like that.
       target_dir = '' if target_dir == '.'
       source_dir = '' if source_dir == '.'
-      target_dir = target_dir.gsub(/^\//, '')
+      target_dir = target_dir.gsub(/^\//u, '')
 
       # if the rename is a NOOP, abort
       if source_dir == target_dir and source_name == target_name
@@ -403,24 +403,23 @@ module Gollum
     def update_page(page, name, format, data, commit = {})
       name   ||= page.name
       format ||= page.format
-      dir      = ::File.dirname(page.path)
+      dir      = ::File.dirname(page.path).force_encoding('utf-8')
       dir      = '' if dir == '.'
-      filename = (rename = page.name != name) ?
-        Gollum::Page.cname(name) : page.filename_stripped
-
+      filename = (rename = page.name.force_encoding('utf-8') != name.force_encoding('utf-8')) ?
+        Gollum::Page.cname(name) : page.filename_stripped.force_encoding('utf-8')
       multi_commit = !!commit[:committer]
       committer = multi_commit ? commit[:committer] : Committer.new(self, commit)
 
       if !rename && page.format == format
-        committer.add(page.path, normalize(data))
+        committer.add(page.path.force_encoding('utf-8'), normalize(data))
       else
-        committer.delete(page.path)
+        committer.delete(page.path.force_encoding('utf-8'))
         committer.add_to_index(dir, filename, format, data, :allow_same_ext)
       end
 
       committer.after_commit do |index, sha|
         @access.refresh
-        index.update_working_dir(dir, page.filename_stripped, page.format)
+        index.update_working_dir(dir, page.filename_stripped.force_encoding('utf-8'), page.format)
         index.update_working_dir(dir, filename, format)
       end
 

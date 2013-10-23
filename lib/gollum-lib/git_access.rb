@@ -167,11 +167,11 @@ module Gollum
       items = []
       tree.each do |entry|
         if entry[:type] == 'blob'
-          items << BlobEntry.new(entry[:sha], entry[:path], entry[:size], entry[:mode].to_i(8)) 
+          items << BlobEntry.new(entry[:sha], entry[:path].force_encoding('utf-8'), entry[:size], entry[:mode].to_i(8)) 
         end
       end
       if dir = @page_file_dir
-        regex = /^#{dir}\//
+        regex = /^#{dir}\//u
         items.select { |i| i.path =~ regex }
       else
         items

@@ -57,7 +57,7 @@ module Gollum
     end
 
     def render_files
-      html = ''
+      html = ''.force_encoding('utf-8')
       count = @pages.size
       folder_start = -1
 
